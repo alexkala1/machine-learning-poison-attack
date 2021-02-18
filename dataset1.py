@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 from sklearn import preprocessing
 from sklearn.preprocessing import StandardScaler
-
 def read_data():
     names = ['State', 'Account Length', 'Area Code', 'Phone', 'Intl Plan', 'VMail Plan', 
              'VMail Message', 'Day Mins', 'Day Calls', 'Day Charge','Eve Mins', 'Eve Calls',
@@ -21,7 +20,7 @@ def read_data():
     churn_df['VMail Plan'] = numeric.fit_transform(churn_df['VMail Plan'])
 
     # Isolate target column after converting to numeric
-    y = numeric.fit_transform(churn_df['Churn'])
+    Y = numeric.fit_transform(churn_df['Churn'])
 
     # We don't need these columns
     to_drop = ['State','Area Code','Phone','Churn']
@@ -32,5 +31,5 @@ def read_data():
     # Normalize data by mean and standard deviation
     scaler = StandardScaler()
     X = scaler.fit_transform(X)
-    
-    return X,y
+
+    return X,Y

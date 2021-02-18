@@ -1,3 +1,4 @@
+from secml.data import CDataset
 from secml.data.loader import CDLRandomBlobs
 from secml.data.splitter import CTrainTestSplit
 from secml.ml.features import CNormalizerMinMax
@@ -5,8 +6,8 @@ from secml.ml.peval.metrics import CMetricAccuracy
 from secml.ml.classifiers import CClassifierSVM
 from secml.ml.kernels import CKernelRBF
 from secml.adv.attacks import CAttackPoisoningSVM
-from secml.figure import CFigure
-from secml.optim.constraints import CConstraintBox
+from dataset1 import read_data
+
 
 random_state = 999
 
@@ -15,11 +16,15 @@ samplesNumber = 300  # Number of samples
 centers = [[-1, -1], [+1, +1]]  # Centers of the clusters
 deviationOfClusters = 0.9  # Standard deviation of the clusters
 
-dataset = CDLRandomBlobs(n_features=featuresNumber,
-                         centers=centers,
-                         cluster_std=deviationOfClusters,
-                         n_samples=samplesNumber,
-                         random_state=random_state).load()
+# dataset = CDLRandomBlobs(n_features=featuresNumber,
+#                          centers=centers,
+#                          cluster_std=deviationOfClusters,
+#                          n_samples=samplesNumber,
+#                          random_state=random_state).load()
+
+incdataset = read_data()
+
+dataset = CDataset(incdataset[0], incdataset[1])
 
 setSamplesTrainingNumber = 100  # Number of training set samples
 setSamplesValidationNumber = 100  # Number of validation set samples
@@ -86,31 +91,14 @@ poisonAttack.yc = choiceY
 print("Initial poisoning sample features: {:}".format(choiceX.ravel()))
 print("Initial poisoning sample label: {:}".format(choiceY.item()))
 
-# First plot
-figure = CFigure(4, 5)
+# Number of poisoning points to generate
+poisoningPointsNumber = 20
+poisonAttack.n_points = poisoningPointsNumber
 
-grid_limits = [(lowerBound - 0.1, upperBound + 0.1),
-               (lowerBound - 0.1, upperBound + 0.1)]
-
-figure.sp.plot_ds(training)
-
-# highlight the initial poisoning sample showing it as a star
-figure.sp.plot_ds(training[0, :], markers='*', markersize=16)
-
-figure.sp.title('Attacker objective and gradients')
-figure.sp.plot_fun(
-    func=poisonAttack.objective_function,
-    grid_limits=grid_limits, plot_levels=False,
-    n_grid_points=10, colorbar=True)
-
-# plot the box constraint
-
-box = fbox = CConstraintBox(lb=lowerBound, ub=upperBound)
-figure.sp.plot_constraint(box, grid_limits=grid_limits,
-                          n_grid_points=10)
-
-figure.tight_layout()
-figure.show()
+# Run the poisoning attack
+print("Attack started...")
+poisonYPrediction, poisonScores, poisoningPoints, f_opt = poisonAttack.run(test.X, test.Y)
+print("Attack complete!")
 
 # Number of poisoning points to generate
 poisoningPointsNumber = 20
@@ -135,46 +123,3 @@ poisonedClassifier = classifier.deepcopy()
 poisonedClassifierTraining = training.append(poisoningPoints)  # Join the training set with the poisoning points
 poisonedClassifier.fit(poisonedClassifierTraining.X, poisonedClassifierTraining.Y)
 
-# Define common bounds for the subplots
-min_limit = min(poisonedClassifierTraining.X.min(), test.X.min())
-max_limit = max(poisonedClassifierTraining.X.max(), test.X.max())
-grid_limits = [[min_limit, max_limit], [min_limit, max_limit]]
-
-
-# Last plot prints
-figure = CFigure(10, 10)
-
-figure.subplot(2, 2, 1)
-figure.sp.title("Original classifier (training set)")
-figure.sp.plot_decision_regions(
-    classifier, n_grid_points=200, grid_limits=grid_limits)
-figure.sp.plot_ds(training, markersize=5)
-figure.sp.grid(grid_on=False)
-
-figure.subplot(2, 2, 2)
-figure.sp.title("Poisoned classifier (training set + poisoning points)")
-figure.sp.plot_decision_regions(
-    poisonedClassifier, n_grid_points=200, grid_limits=grid_limits)
-figure.sp.plot_ds(training, markersize=5)
-figure.sp.plot_ds(poisoningPoints, markers=['*', '*'], markersize=12)
-figure.sp.grid(grid_on=False)
-
-figure.subplot(2, 2, 3)
-figure.sp.title("Original classifier (test set)")
-figure.sp.plot_decision_regions(
-    classifier, n_grid_points=200, grid_limits=grid_limits)
-figure.sp.plot_ds(test, markersize=5)
-figure.sp.text(0.05, -0.25, "Accuracy on test set: {:.2%}".format(originalClassifierAccuracy),
-               bbox=dict(facecolor='white'))
-figure.sp.grid(grid_on=False)
-
-figure.subplot(2, 2, 4)
-figure.sp.title("Poisoned classifier (test set)")
-figure.sp.plot_decision_regions(
-    poisonedClassifier, n_grid_points=200, grid_limits=grid_limits)
-figure.sp.plot_ds(test, markersize=5)
-figure.sp.text(0.05, -0.25, "Accuracy on test set: {:.2%}".format(poisonedAccuracy),
-               bbox=dict(facecolor='white'))
-figure.sp.grid(grid_on=False)
-
-figure.show()
