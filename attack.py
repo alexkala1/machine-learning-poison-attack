@@ -101,7 +101,7 @@ poisonYPrediction, poisonScores, poisoningPoints, f_opt = poisonAttack.run(test.
 print("Attack complete!")
 
 # Number of poisoning points to generate
-poisoningPointsNumber = 20
+poisoningPointsNumber = 40
 poisonAttack.n_points = poisoningPointsNumber
 
 # Run the poisoning attack
