@@ -9,14 +9,9 @@ from dataset1 import read_data
 
 random_state = 999
 
-featuresNumber = 2  # Number of features
-samplesNumber = 300  # Number of samples
-centers = [[-1, -1], [+1, +1]]  # Centers of the clusters
-deviationOfClusters = 0.9  # Standard deviation of the clusters
+incomingDataset = read_data()
 
-incdataset = read_data()
-
-dataset = CDataset(incdataset[0], incdataset[1])
+dataset = CDataset(incomingDataset[0], incomingDataset[1])
 
 setSamplesTrainingNumber = 100  # Number of training set samples
 setSamplesValidationNumber = 100  # Number of validation set samples
