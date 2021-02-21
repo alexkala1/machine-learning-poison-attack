@@ -73,7 +73,7 @@ poisonAttack = CAttackPoisoningSVM(classifier=classifier,
                                    solver_params=solver_params,
                                    random_seed=random_state)
 
-# chose and set the initial poisoning sample features and label
+# choose and set the initial poisoning sample features and label
 choiceX = training[0, :].X
 choiceY = training[0, :].Y
 poisonAttack.x0 = choiceX
@@ -84,8 +84,7 @@ print("Initial poisoning sample features: {:}".format(choiceX.ravel()))
 print("Initial poisoning sample label: {:}".format(choiceY.item()))
 
 # Number of poisoning points to generate
-poisoningPointsNumber = 100
-poisonAttack.n_points = poisoningPointsNumber
+poisonAttack.n_points = 100
 
 # Run the poisoning attack
 print("Attack started...")
